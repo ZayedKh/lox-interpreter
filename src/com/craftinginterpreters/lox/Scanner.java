@@ -21,6 +21,28 @@ class Scanner {
     private int current = 0;
     private int line = 1;
 
+    private static final Map<String, TokenType> keywords;
+
+    static {
+        keywords = new HashMap<>();
+        keywords.put("and",    AND);
+        keywords.put("class",  CLASS);
+        keywords.put("else",   ELSE);
+        keywords.put("false",  FALSE);
+        keywords.put("for",    FOR);
+        keywords.put("fun",    FUN);
+        keywords.put("if",     IF);
+        keywords.put("nil",    NIL);
+        keywords.put("or",     OR);
+        keywords.put("print",  PRINT);
+        keywords.put("return", RETURN);
+        keywords.put("super",  SUPER);
+        keywords.put("this",   THIS);
+        keywords.put("true",   TRUE);
+        keywords.put("var",    VAR);
+        keywords.put("while",  WHILE);
+    }
+
     Scanner(String source) {
         this.source = source;
     }
@@ -129,6 +151,8 @@ class Scanner {
             default:
                 if (isDigit(c)) {
                     number();
+                } else if (isAlpha(c)) {
+                    identifier();
                 } else {
                     // in case of chars that aren't represented in lox throw this error.
                     // program keeps scanning to find any other errors
@@ -228,23 +252,44 @@ class Scanner {
         }
 
         // add a number token, use double built in method to convert string to double.
-        addToken(NUMBER, Double.parseDouble(source.substring(start,current)));
+        addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
     }
 
     // while peek looks ahead to one char, peek ahead looks forward to two chars
-    private char peekNext(){
-        if(current + 1 >= source.length()){
+    private char peekNext() {
+        if (current + 1 >= source.length()) {
             return '\0';
         }
 
         return source.charAt(current + 1);
     }
+
+    private void identifier(){
+        while(isAlphaNumeric(peek())) {
+            advance();
+        }
+
+        // get the string between start and current
+        // it is either a reserved keyword, or it is an identified
+        String text = source.substring(start, current);
+
+        // locate if the string exists in our keyword map
+        TokenType type = keywords.get(text);
+
+        // if it doesn't exist we know it is an identifier.
+        if(type == null){
+            type = IDENTIFIER;
+        }
+
+
+        addToken(type);
+    }
+
+    private boolean isAlphaNumeric(char c){
+        return isAlpha(c) || isDigit(c);
+    }
+
+    private boolean isAlpha(char c) {
+        return ((c >= 'a' && c <= 'z') ||  (c >= 'A' && c <= 'Z') || (c == '_'));
+    }
 }
-
-
-
-
-
-
-
-
