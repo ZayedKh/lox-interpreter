@@ -104,6 +104,8 @@ class Scanner {
                 // special handling due to // comment possibility
                 if (match('/')) {
                     // if it is a comment, we just consume all chars until the next line
+                    // while comments are lexemes, we don't want to deal with them, so we don't call
+                    // addToken(), after we move to a new line, start gets reset and the lexeme is lost.
                     while (peek() != '\n' && !isAtEnd()) {
                         advance();
                     }
@@ -111,12 +113,29 @@ class Scanner {
                     addToken(SLASH);
                 }
                 break;
+            case ' ':
+            case '\r':
+            case '\t':
+                // Ignore whitespace.
+                break;
+
+            case '\n':
+                line++;
+                break;
+            // case to handle string - we know that they always start with "
+            case '"':
+                string();
+                break;
             default:
-                // in case of chars that aren't represented in lox throw this error.
-                Lox.error(line, "Unexpected character.");
-                // program keeps scanning to find any other errors
-                // since hadError is set to true, we never actually execute the code
-                // we just notify the user of all the errors they find in the code
+                if (isDigit(c)) {
+                    number();
+                } else {
+                    // in case of chars that aren't represented in lox throw this error.
+                    // program keeps scanning to find any other errors
+                    // since hadError is set to true, we never actually execute the code
+                    // we just notify the user of all the errors they find in the code
+                    Lox.error(line, "Unexpected character.");
+                }
                 break;
         }
     }
@@ -154,11 +173,71 @@ class Scanner {
         current++;
         return true;
     }
-    private char peek(){
-        if(isAtEnd()){
+
+    // method to lookahead, doesn't actually consumer char.
+    private char peek() {
+        if (isAtEnd()) {
             return '\0';
         }
         return source.charAt(current);
+    }
+
+    private void string() {
+        // while we don't find the ending quotation of the string
+        while (peek() != '"' && !isAtEnd()) {
+            // if there is a new line char
+            if (peek() == '\n') {
+                line++;
+            }
+            // keep consuming chars
+            advance();
+        }
+
+        // throw error if we reach end of program without terminating the string
+        if (isAtEnd()) {
+            Lox.error(line, "unterminated string.");
+            return;
+        }
+
+        // consume the closing "
+        advance();
+
+        // trim the beginning " and ending "
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    private void number() {
+        // while the next char is also a digit, advance
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        // if there is a decimal, and the digit after the decimal is a number as well
+        if (peek() == '.' && isDigit(peekNext())) {
+            // consume the '.'
+            advance();
+            // while the next char is also a digit, advance
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        // add a number token, use double built in method to convert string to double.
+        addToken(NUMBER, Double.parseDouble(source.substring(start,current)));
+    }
+
+    // while peek looks ahead to one char, peek ahead looks forward to two chars
+    private char peekNext(){
+        if(current + 1 >= source.length()){
+            return '\0';
+        }
+
+        return source.charAt(current + 1);
     }
 }
 
