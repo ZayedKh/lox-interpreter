@@ -83,27 +83,82 @@ class Scanner {
             case '*':
                 addToken(STAR);
                 break;
+
+            // here we have operators, but since operators are mostly used in tandem
+            // (!=, ==, >=) we can't exactly use single char scanning
+            // therefore we need to check the second char and see if it creates a valid lexeme/token
+            // ternary operators are used for the implementation.
+            case '!':
+                addToken(match('=') ? BANG_EQUAL : BANG);
+                break;
+            case '=':
+                addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+                break;
+            case '<':
+                addToken(match('=') ? LESS_EQUAL : LESS);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_EQUAL : GREATER);
+                break;
+            case '/':
+                // special handling due to // comment possibility
+                if (match('/')) {
+                    // if it is a comment, we just consume all chars until the next line
+                    while (peek() != '\n' && !isAtEnd()) {
+                        advance();
+                    }
+                } else {
+                    addToken(SLASH);
+                }
+                break;
+            default:
+                // in case of chars that aren't represented in lox throw this error.
+                Lox.error(line, "Unexpected character.");
+                // program keeps scanning to find any other errors
+                // since hadError is set to true, we never actually execute the code
+                // we just notify the user of all the errors they find in the code
+                break;
         }
     }
 
     // helper function to consumer next character in source and return it to
     // scanToken()
-    private char advance(){
+    private char advance() {
         return source.charAt(current++);
+        // we return the CURRENT char, THEN increment.
     }
 
     // helper method for adding token.
     // this method grabs the current lexeme and creates a new token for it.
-    private void addToken(TokenType type){
+    private void addToken(TokenType type) {
         addToken(type, null);
     }
 
 
     // overloaded method of addToken() to deal with literal tokens
-    private void addToken(TokenType type, Object literal){
+    private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
 
+    }
+
+    private boolean match(char expected) {
+        // if we are at the end we know there are no more chars - return false
+        if (isAtEnd()) {
+            return false;
+        }
+        // if the
+        if (source.charAt(current) != expected) {
+            return false;
+        }
+        current++;
+        return true;
+    }
+    private char peek(){
+        if(isAtEnd()){
+            return '\0';
+        }
+        return source.charAt(current);
     }
 }
 
