@@ -12,6 +12,9 @@ import java.util.Scanner;
 
 public class Lox {
 
+    // Used so that we don't execute code that has a known error.
+    static boolean hadError = false;
+
     public static void main(String[] args) {
         if(args.length > 1){
             System.out.println("Usage: jlox [script");
@@ -32,6 +35,10 @@ public class Lox {
     private static void runFile(String path) throws IOException{
         byte [] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
+
+        if(hadError){
+            System.exit(65); // exit with non-zero exit code
+        }
     }
 
 
@@ -55,6 +62,7 @@ public class Lox {
                 break; // break if line is null
             }
             run (line);
+            hadError = false; // If user makes mistake, shouldn't kill their entire session.
         }
     }
 
@@ -68,5 +76,17 @@ public class Lox {
         for(Token token : tokens){
             System.out.println(token);
         }
+    }
+
+
+    // Error handling
+
+    static void error(int line, String message){
+        report(line, "", message);
+    }
+
+    private static void report(int line, String where, String message){
+        System.err.println("[line " + "] Error" + where + ": " + message);
+        hadError = true;
     }
 }
