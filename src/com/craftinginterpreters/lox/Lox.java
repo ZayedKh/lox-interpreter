@@ -12,10 +12,17 @@ import java.util.Scanner;
 
 public class Lox {
 
+    /*
+      Line of lox code:
+      var language = "lox";
+
+      5 lexemes in this expression. Bundling lexemes together results in a token
+     */
+
     // Used so that we don't execute code that has a known error.
     static boolean hadError = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if(args.length > 1){
             System.out.println("Usage: jlox [script");
             System.exit(64);
@@ -53,7 +60,7 @@ public class Lox {
             String line = reader.readLine(); // Reads a line of input from user on CLI
             /*
                 Typing ctrl+d kills an interactive command-line app, this signals an end of file
-                condition to the program. When ctrl+d is pressed, readLine returns null. Thus we check
+                condition to the program. When ctrl+d is pressed, readLine returns null, thus we check
                 for that to exit the loop.
              */
 
@@ -72,7 +79,7 @@ public class Lox {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        // For now we just print out tokens to debug.
+        // For now, we just print out tokens to debug.
         for(Token token : tokens){
             System.out.println(token);
         }
@@ -86,7 +93,7 @@ public class Lox {
     }
 
     private static void report(int line, String where, String message){
-        System.err.println("[line " + "] Error" + where + ": " + message);
+        System.err.println("[line " + line +  "] Error" + where + ": " + message);
         hadError = true;
     }
 }
