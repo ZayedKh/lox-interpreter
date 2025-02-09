@@ -80,6 +80,13 @@ public class Lox {
         List<Token> tokens = scanner.scanTokens();
 
         // For now, we just print out tokens to debug.
+        /*
+        In format:
+
+        Token type Lexeme Object literal (if applicable)
+
+        */
+
         for(Token token : tokens){
             System.out.println(token);
         }
