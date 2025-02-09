@@ -44,3 +44,58 @@ var num2 = 15.15;
 - Nil
 
 
+## Process
+
+### Lexing/Scanning
+
+The first step in interpreting a language is lexing, we use a scanner to take in a stream of characters and categorize them into lexemes, after which each lexeme is tokenized.
+
+```javascript
+var num = 15;
+```
+Present lexemes:
+
+"var", "num", "=" , "15" and ";"
+
+Tokenize in format:  
+Token type | Lexeme | Object literal (if applicable):
+
+VAR var null
+
+IDENTIFIER num null
+
+EQUAL = null
+
+NUMBER 15 15.0
+
+SEMICOLON ; null
+
+
+We can create our own Scanner class which takes in a stream of chars, and uses a switch statement to covert each lexeme into its respective token:
+
+```java
+class Scanner{
+    private void scanToken() {
+            char c = advance();
+
+            // switch statement to tokenize lexemes.
+            switch (c) {
+                case '(':
+                    addToken(LEFT_PAREN);
+                    break;
+                case ')':
+                    addToken(RIGHT_PAREN);
+                    break;
+                case '{':
+                ...
+                default:
+                break;
+        }
+    }
+}
+
+```
+
+
+
+
