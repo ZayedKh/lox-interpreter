@@ -164,7 +164,7 @@ class Scanner {
         }
     }
 
-    // helper function to consumer next character in source and return it to
+    // helper function to consume next character in source and return it to
     // scanToken()
     private char advance() {
         return source.charAt(current++);
@@ -190,7 +190,8 @@ class Scanner {
         if (isAtEnd()) {
             return false;
         }
-        // if the
+        // if the char is not what we expected, we conclude that the operator is stand=alone
+        // and return false;
         if (source.charAt(current) != expected) {
             return false;
         }
@@ -198,7 +199,7 @@ class Scanner {
         return true;
     }
 
-    // method to lookahead, doesn't actually consumer char.
+    // method to lookahead, doesn't actually consume char.
     private char peek() {
         if (isAtEnd()) {
             return '\0';
